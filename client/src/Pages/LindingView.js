@@ -5,15 +5,17 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import { Paper, TextField , Button, Container , Box } from '@mui/material';
-import { useDispatch } from 'react-redux';
+import { useDispatch , useSelector } from 'react-redux';
 import { searchFlights } from '../component/action/flight-actions';
-
+import { Navigate, useNavigate } from 'react-router-dom';
 
 
 
 export default function LindingView(props) {
     const [travelDate , setTravelDate] = React.useState(new Date());
     const [returnDate , setReturnDate] = React.useState(new Date());
+    const {searchResults} = useSelector(state => state.search);
+    const Navigate = useNavigate();
     const [fromData , setFormData]= React.useState({
         origin: '',
         dest: '',
@@ -23,9 +25,10 @@ export default function LindingView(props) {
     })
     const handleInputChange = event => {
         const { name, value } = event.target;
-        console.log();
+        
         setFormData(prevData =>({...fromData, [name]: value}  ));
     };
+    
     const dispatch = useDispatch();
     const handleSearch = () => {
         const info = {};
@@ -35,6 +38,33 @@ export default function LindingView(props) {
         dispatch(searchFlights(info)).then(resp => {
             console.log("request complet")
         })
+    }
+    const handleBooking = (FlightInfo) => {
+        Navigate(`/Book-Flight/${FlightInfo.flid}`);
+    }
+    console.log(searchResults);
+    const HandleDataDisplay = () => {
+        if(!searchResults) {
+            return null;
+        }
+        return (
+            searchResults?.responseData.map((flight, index) =>(
+                <React.Fragment key={index}>
+                <Paper key={index} elevation={3}>
+                    <div style={{padding: '10px'}}>
+                        <div>Time: {flight.departureTime}</div>
+                        <div>Cost : {flight.cost}</div>
+                        <div>Aircraft : {flight.aircraft}</div>
+                        
+                    </div>
+                    <div><button onClick={()=> handleBooking(flight)} variant='contained'>BOOK</button></div>
+                    <br/>
+                </Paper>
+                <br/>
+                </React.Fragment>
+            )
+        )  
+        )
     }
     return (
         <div>
@@ -118,7 +148,17 @@ export default function LindingView(props) {
                 </Container>
 
                 <div>
-                <Stack direction="column" justifyContent="center">
+                <Stack direction="column" justifyContent="center" padding={10}>
+                    <Container maxWidth='xl'>
+
+                        {HandleDataDisplay()}
+
+                    </Container>
+
+                </Stack>
+
+
+                <Stack direction="column" justifyContent="center" >
                     <Container maxWidth='xl'>
                 <div>YO Reserve Your flight Now</div>
                 <Paper elevation={6}>

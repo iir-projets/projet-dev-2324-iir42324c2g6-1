@@ -1,4 +1,4 @@
-import { SAVE_BOOKING, SEARCH_FLIGHTS } from "../action/actionTypes";
+import {SAVE_BOOKING,  SEARCH_FLIGHTS } from "../action/actionTypes";
 
 export default (state = {} , action) => {
 
@@ -6,7 +6,8 @@ export default (state = {} , action) => {
     case SEARCH_FLIGHTS : 
         return {...state, searchResults:action.payload}
     case SAVE_BOOKING : 
-        return {...state, savedBooking:action.payload}    
+        return {...state, savedBooking:action.payload}        
+
     default: 
     return state;
    }
