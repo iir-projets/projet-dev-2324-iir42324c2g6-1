@@ -5,7 +5,7 @@ import com.myflights.yazidairline.repository.FlightRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+
 import java.util.List;
 
 @Service
@@ -21,5 +21,9 @@ public class FlightService {
     public List<Flight> findFlights(String origin, String dest) {
         return repo.findByOriginAndDest(origin,dest);
     }
+    public Flight findFlightById(int flid) {
+        return repo.findByFlid(flid);
+    }
+
 
 }

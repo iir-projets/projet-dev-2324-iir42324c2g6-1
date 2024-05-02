@@ -12,7 +12,7 @@ import java.util.ListIterator;
 public class Flight  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer fl_id;
+    private Integer flid;
 
     @Column(name = "depart_location")
     private String origin;
@@ -33,12 +33,15 @@ public class Flight  {
     @Column(name = "aircraft")
     private String aircraft;
 
-    public Integer getFl_id() {
-        return fl_id;
+
+
+
+    public  Integer getFlid() {
+        return flid;
     }
 
-    public void setFl_id(Integer fl_id) {
-        this.fl_id = fl_id;
+    public void setFlid(Integer flid) {
+        this.flid = flid;
     }
 
     public String getOrigin() {

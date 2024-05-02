@@ -10,4 +10,5 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
  Flight findByOriginAndDestAndDepartureDate(String origin,String dest,String departureDate);
  Flight findByDepartureDateBetween(String startDate,String endDate);
  List<Flight> findByOriginAndDest(String origin, String dest);
+Flight findByFlid(Integer flid);
 }
