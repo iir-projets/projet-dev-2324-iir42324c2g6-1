@@ -4,8 +4,11 @@ import Navbar from './component/Navbar';
 import LindingView from './Pages/LindingView';
 import AppRouters from './AppRouters';
 
+import { BrowserRouter } from "react-router-dom";
+
 function App() {
   return (
+    
     <div className='App'> 
       <header>
       <div style={{minHeight:"10vh", width:'100%', backgroundColor:"#5BB4FF"}}></div>
@@ -25,6 +28,8 @@ function App() {
       </footer>
 
     </div>
+    
+   
   );
 }
 

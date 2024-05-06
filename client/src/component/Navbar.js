@@ -63,6 +63,7 @@ export default function Navbar() {
             color="#FF785B"
             aria-label="open drawer"
             sx={{ mr: 2 }}
+            href='/Login'
           >
           <MenuIcon />
           </IconButton>

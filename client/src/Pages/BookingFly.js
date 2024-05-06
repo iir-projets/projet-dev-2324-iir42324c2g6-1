@@ -116,8 +116,8 @@ export default function BookingFly(){
             <h3>Enter Personal Information</h3>
               <div className='inner-search-form'>
                 
-              <Stack direction="row " paddingLeft={45}>
-               <div>  
+              <Stack direction="row " justifyContent="center">
+               <div> 
                   <TextField 
                           // onChange={(event) =>  handleFirstNameChange(event.target.value)}  
                           label="First name" 
