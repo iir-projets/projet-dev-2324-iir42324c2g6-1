@@ -1,5 +1,5 @@
 import flightsapi from '../api/flightsapi';
-import { SAVE_BOOKING,SEARCH_FLIGHTS } from "./actionTypes"
+import { SAVE_BOOKING,SAVE_USERS,SEARCH_FLIGHTS } from "./actionTypes"
 export const searchFlights = (info) => async (dispatch) => {
     try {
         const response = await flightsapi.get(`/find-flights/${info.origin}/${info.dest}`)
@@ -27,5 +27,21 @@ export const saveBooking = (info) => async (dispatch) => {
           console.log(error)
         }
       
+}
+
+export const saveUsers = (info) => async (dispatch) => {
+
+  console.log(info);
+  try {
+   const response = await flightsapi.post("/save-user", {...info})
+
+   if(response && response.status === 200){
+        dispatch({type:SAVE_USERS, payload : response.data});
+   }
+
+  }catch (error) {
+    console.log(error)
+  }
+
 }
 

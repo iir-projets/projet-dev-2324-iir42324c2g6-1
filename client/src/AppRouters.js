@@ -8,6 +8,7 @@ export default function AppRouters(props){
     return(
         <BrowserRouter>
         <Routes>
+
         <Route path="/login" element={<LindingView/>} />
 
             <Route path="/flightinfo" element={<FlightInfo/>} />
