@@ -8,6 +8,9 @@ import { Paper, TextField , Button, Container , Box } from '@mui/material';
 import { useDispatch , useSelector } from 'react-redux';
 import { searchFlights } from '../component/action/flight-actions';
 import { Navigate, useNavigate } from 'react-router-dom';
+import image from '../assets/Design.png';
+import image2 from '../assets/marrakesk.jpg';
+import image1 from '../assets/greece.jpg'
 
 
 
@@ -67,7 +70,12 @@ export default function LindingView(props) {
         )
     }
     return (
-        <div>
+        <div style={{
+            backgroundImage: `url(${image})`,            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            minHeight: '100vh', // Ensure the background covers the entire viewport height
+            overflow: 'auto', // Allow content to scroll if needed
+        }}>
             <Stack direction="column" justifyContent="center">
                 <Container maxWidth='sm'>
                 <div>YO Reserve Your flight Now</div>
@@ -168,6 +176,7 @@ export default function LindingView(props) {
                     <Stack direction="row" justifyContent="center" spacing={3}>
                     <Box
                     sx={{
+                        backgroundImage: `url(${image2})`,
                     width: 200,
                     height: 200,
                     border: 'solid 2px blue',
@@ -176,6 +185,7 @@ export default function LindingView(props) {
                     />
                     <Box
                     sx={{
+                    backgroundImage: `url(${image1})`,
                     width: 200,
                     height: 200,
                     border: 'solid 2px blue',
