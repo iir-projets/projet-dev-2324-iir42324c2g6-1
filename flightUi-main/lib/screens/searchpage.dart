@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../controller/SearchPageController.dart';
 import 'package:flightui/models/destinationTicket.dart';
-
 import '../widgets/ticketWidget.dart';
 
 class SearchPage extends StatelessWidget {
@@ -15,30 +14,29 @@ class SearchPage extends StatelessWidget {
         title: const Text('Search Flights'),
       ),
       body: FutureBuilder<List<DestinationTicket>>(
-        future: controller.fetchFlights(),
+        future: controller.findFlights("Chicago","Miami"),
         builder: (BuildContext context, AsyncSnapshot<List<DestinationTicket>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
+            print('Error: ${snapshot.error}');
+            return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            if (snapshot.data != null) {
+            if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+              print('Fetched data: ${snapshot.data}');
               return ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   var flight = snapshot.data![index];
-                  if (flight == null ) {
-                    return const Text('No flight data');
-                  }
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0), // Adjust the vertical spacing here
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: TicketShape(flights: flight),
                   );
                 },
               );
-
             } else {
-              return const Text('No flights found');
+              print('No flights found');
+              return const Center(child: Text('No flights found'));
             }
           }
         },

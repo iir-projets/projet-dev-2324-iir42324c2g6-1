@@ -2,11 +2,14 @@
 
 import 'package:flightui/utils/constants.dart';
 import 'package:flightui/utils/textstyles.dart';
+import 'package:flightui/widgets/ticketWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gap/gap.dart';
+import 'package:flightui/controller/SearchPageController.dart';
+import '../models/DestinationTicket.dart';
 
 class DialogBox extends StatefulWidget {
   DialogBox({super.key});
@@ -21,18 +24,20 @@ class _DialogBoxState extends State<DialogBox> {
   final FocusNode whenFocusNode = FocusNode();
   final FocusNode returnFocusNode = FocusNode();
   final FocusNode passengersFocusNode = FocusNode();
+
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _fromController = TextEditingController();
+  final TextEditingController _toController = TextEditingController();
   final TextEditingController _returnDateController = TextEditingController();
-  DateTime? _isPicked;
-  bool isTrue = false;
 
-  Future<void> _selecteDate(BuildContext context) async {
-    _isPicked = await showDatePicker(
-      initialDate: DateTime.now(),
+  DateTime? _selectedDate;
+  bool isRoundTrip = false;
+
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    DateTime? pickedDate = await showDatePicker(
       context: context,
-      barrierColor: AppColors.blackColor.withOpacity(0.5),
+      initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      currentDate: DateTime.now(),
       lastDate: DateTime.now().add(Duration(days: 90)),
       builder: (context, child) {
         return Theme(
@@ -46,45 +51,14 @@ class _DialogBoxState extends State<DialogBox> {
         );
       },
     );
-    setState(() {
-      if (_isPicked == null) {
-        _dateController.clear();
-      } else {
-        _dateController.text =
-            "${_isPicked?.day}/${_isPicked?.month}/${_isPicked?.year}";
-      }
-    });
-  }
 
-  Future<void> _selecteReturnDate(BuildContext context) async {
-    _returnDateController.clear();
-    _isPicked = await showDatePicker(
-      initialDate: DateTime.now(),
-      context: context,
-      barrierColor: AppColors.blackColor.withOpacity(0.5),
-      firstDate: DateTime.now(),
-      currentDate: DateTime.now(),
-      lastDate: DateTime.now().add(Duration(days: 90)),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.blackColor,
-              onPrimary: AppColors.primaryColor,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    setState(() {
-      if (_isPicked == null) {
-        _returnDateController.clear();
-      } else {
-        _returnDateController.text =
-            "${_isPicked?.day}/${_isPicked?.month}/${_isPicked?.year}";
-      }
-    });
+    if (pickedDate != null) {
+      setState(() {
+        controller.text = "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+      });
+    } else {
+      controller.clear();
+    }
   }
 
   @override
@@ -93,151 +67,93 @@ class _DialogBoxState extends State<DialogBox> {
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+          padding: const EdgeInsets.only(top: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              GestureDetector(
-                onTap: () => setState(() {
-                  isTrue = false;
-                }),
-                child: Container(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  alignment: Alignment.bottomCenter,
-                  decoration: const BoxDecoration(
-                      color: AppColors.secondaryColor,
-                      borderRadius: BorderRadius.vertical(
-                          top: const Radius.circular(15))),
-                  height: commonSize.height * 0.05,
-                  width: commonSize.width * 0.3,
-                  child: Text("One Way",
-                      style: appTextStyle(
-                          AppColors.blackColor,
-                          isTrue == false
-                              ? commonSize.height * 0.02
-                              : commonSize.height * 0.018,
-                          isTrue == false ? FontWeight.bold : FontWeight.w500)),
-                ),
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              GestureDetector(
-                onTap: () => setState(() {
-                  isTrue = true;
-                }),
-                child: Container(
-                  padding: EdgeInsets.only(bottom: 8),
-                  alignment: Alignment.bottomCenter,
-                  decoration: const BoxDecoration(
-                      color: AppColors.secondaryColor,
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(15))),
-                  height: commonSize.height * 0.05,
-                  width: commonSize.width * 0.3,
-                  child: Text(
-                    "Round Trip",
-                    style: appTextStyle(
-                        AppColors.blackColor,
-                        isTrue
-                            ? commonSize.height * 0.02
-                            : commonSize.height * 0.018,
-                        isTrue ? FontWeight.bold : FontWeight.w500),
-                  ),
-                ),
-              ),
+              _buildTripTypeButton("One Way", false),
+              const SizedBox(width: 15),
+              _buildTripTypeButton("Round Trip", true),
             ],
           ),
-        ), // here
+        ),
         Padding(
-          padding: EdgeInsets.only(
-            top: commonSize.height * 0.06,
-          ),
+          padding: EdgeInsets.only(top: commonSize.height * 0.06),
           child: Container(
             padding: const EdgeInsets.all(10),
-            height:
-                isTrue ? commonSize.height * 0.45 : commonSize.height * 0.42,
+            height: isRoundTrip ? commonSize.height * 0.45 : commonSize.height * 0.42,
             width: commonSize.width,
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                    color: AppColors.blackColor.withOpacity(0),
-                    offset: const Offset(1, 2),
-                    blurRadius: 2,
-                    spreadRadius: 1)
+                  color: AppColors.blackColor.withOpacity(0.1),
+                  offset: const Offset(1, 2),
+                  blurRadius: 2,
+                  spreadRadius: 1,
+                ),
               ],
               border: Border.all(color: AppColors.borderColor, width: 2),
               color: AppColors.secondaryColor,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(30),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(30)),
             ),
             child: Stack(
               children: [
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    RoundedTextField(
-                      HintText: "From ?",
+                    _buildRoundedTextField(
+                      hintText: "From?",
                       iconData: MaterialIcons.flight_takeoff,
                       focusNode: fromFocusNode,
+                      controller: _fromController,
                     ),
-                    RoundedTextField(
-                      HintText: "where to?",
+                    _buildRoundedTextField(
+                      hintText: "Where to?",
                       iconData: MaterialIcons.flight_land,
                       focusNode: toFocusNode,
+                      controller: _toController,
                     ),
-                    isTrue
-                        ? Column(
-                            children: [
-                              RoundedTextField(
-                                onTap: () {
-                                  return _selecteDate(context);
-                                },
-                                isEnalbled: true,
-                                controller: _dateController,
-                                HintText: "Travelling when?",
-                                iconData:
-                                    MaterialCommunityIcons.calendar_arrow_right,
-                                focusNode: whenFocusNode,
-                              ),
-                              Gap(commonSize.height * 0.008),
-                              RoundedTextField(
-                                onTap: () {
-                                  return _selecteReturnDate(context);
-                                },
-                                isEnalbled: true,
-                                controller: _returnDateController,
-                                HintText: "Return When?",
-                                iconData:
-                                    MaterialCommunityIcons.calendar_arrow_left,
-                                focusNode: returnFocusNode,
-                              ),
-                            ],
-                          )
-                        : RoundedTextField(
-                            onTap: () {
-                              return _selecteDate(context);
-                            },
-                            isEnalbled: true,
-                            controller: _dateController,
-                            HintText: "when?",
-                            iconData: MaterialCommunityIcons.calendar_month,
+                    if (isRoundTrip)
+                      Column(
+                        children: [
+                          _buildRoundedTextField(
+                            hintText: "Travelling when?",
+                            iconData: MaterialCommunityIcons.calendar_arrow_right,
                             focusNode: whenFocusNode,
+                            controller: _dateController,
+                            isEnabled: true,
+                            onTap: () => _selectDate(context, _dateController),
                           ),
-                    RoundedTextField(
-                      HintText: "Passengers: 01",
+                          Gap(commonSize.height * 0.008),
+                          _buildRoundedTextField(
+                            hintText: "Return when?",
+                            iconData: MaterialCommunityIcons.calendar_arrow_left,
+                            focusNode: returnFocusNode,
+                            controller: _returnDateController,
+                            isEnabled: true,
+                            onTap: () => _selectDate(context, _returnDateController),
+                          ),
+                        ],
+                      )
+                    else
+                      _buildRoundedTextField(
+                        hintText: "When?",
+                        iconData: MaterialCommunityIcons.calendar_month,
+                        focusNode: whenFocusNode,
+                        controller: _dateController,
+                        isEnabled: true,
+                        onTap: () => _selectDate(context, _dateController),
+                      ),
+                    _buildRoundedTextField(
+                      hintText: "Passengers: 01",
                       iconData: MaterialIcons.person,
                       focusNode: passengersFocusNode,
-                      isEnalbled: true,
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/searchpage');
-                      },
+                      onTap: _searchFlight,
                       child: Container(
                         alignment: Alignment.center,
-                        width: double.maxFinite,
+                        width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         decoration: BoxDecoration(
                           color: AppColors.blackColor,
@@ -245,8 +161,7 @@ class _DialogBoxState extends State<DialogBox> {
                         ),
                         child: Text(
                           "Search Flight",
-                          style: appTextStyle(
-                              AppColors.primaryColor, 12, FontWeight.w600),
+                          style: appTextStyle(AppColors.primaryColor, 12, FontWeight.w600),
                         ),
                       ),
                     ),
@@ -257,9 +172,7 @@ class _DialogBoxState extends State<DialogBox> {
                   top: commonSize.height * 0.045,
                   child: CircleAvatar(
                     backgroundColor: AppColors.blackColor,
-                    radius: isTrue
-                        ? (commonSize.width * 0.14) / 2
-                        : (commonSize.width * 0.15) / 2,
+                    radius: commonSize.width * (isRoundTrip ? 0.07 : 0.075),
                     child: Icon(
                       CupertinoIcons.arrow_swap,
                       size: commonSize.width * 0.06,
@@ -274,27 +187,41 @@ class _DialogBoxState extends State<DialogBox> {
       ],
     );
   }
-}
 
-class RoundedTextField extends StatelessWidget {
-  // ignore: non_constant_identifier_names
-  final String HintText;
-  final IconData iconData;
-  final FocusNode focusNode;
-  final isEnalbled, controller;
-  final onTap;
+  Widget _buildTripTypeButton(String title, bool value) {
+    return GestureDetector(
+      onTap: () => setState(() => isRoundTrip = value),
+      child: Container(
+        padding: const EdgeInsets.only(bottom: 8),
+        alignment: Alignment.bottomCenter,
+        decoration: BoxDecoration(
+          color: AppColors.secondaryColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+        ),
+        height: MediaQuery.of(context).size.height * 0.05,
+        width: MediaQuery.of(context).size.width * 0.3,
+        child: Text(
+          title,
+          style: appTextStyle(
+            AppColors.blackColor,
+            value == isRoundTrip
+                ? MediaQuery.of(context).size.height * 0.02
+                : MediaQuery.of(context).size.height * 0.018,
+            value == isRoundTrip ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
 
-  const RoundedTextField({
-    super.key,
-    required this.HintText,
-    required this.iconData,
-    required this.focusNode,
-    this.isEnalbled,
-    this.controller,
-    this.onTap,
-  });
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildRoundedTextField({
+    required String hintText,
+    required IconData iconData,
+    required FocusNode focusNode,
+    TextEditingController? controller,
+    bool? isEnabled = false,
+    void Function()? onTap,
+  }) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.borderColor, width: 2),
@@ -317,17 +244,13 @@ class RoundedTextField extends StatelessWidget {
               child: TextField(
                 onTap: onTap,
                 controller: controller,
-                readOnly: isEnalbled ?? false,
+                readOnly: isEnabled ?? false,
                 focusNode: focusNode,
                 style: appTextStyle(Colors.grey.shade600, 14, FontWeight.w600),
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                  ),
-                  hintText: HintText,
-                  hintStyle:
-                      appTextStyle(Colors.grey.shade500, 12, FontWeight.w600)
-                          .copyWith(),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  hintText: hintText,
+                  hintStyle: appTextStyle(Colors.grey.shade500, 12, FontWeight.w600),
                   border: InputBorder.none,
                 ),
               ),
@@ -337,4 +260,20 @@ class RoundedTextField extends StatelessWidget {
       ),
     );
   }
-}
+
+  void _searchFlight() {
+    final SearchPageController _searchPageController = SearchPageController();
+
+    void _searchFlight() {
+      SearchPageController controller = SearchPageController();
+
+      if (_fromController.text.isNotEmpty && _toController.text.isNotEmpty) {
+        if (_fromController.text.isNotEmpty && _toController.text.isNotEmpty) {
+          // Use the instance to call findFlights
+          controller.findFlights(_fromController.text, _toController.text);
+          _searchPageController.findFlights(_fromController.text, _toController.text);
+        } else if (_fromController.text.isEmpty && _toController.text.isEmpty) {
+          controller.fetchFlights();
+        }
+      }
+    }}}

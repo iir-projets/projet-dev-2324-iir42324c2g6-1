@@ -7,6 +7,7 @@ import 'package:flightui/models/destinationTicket.dart';
 
 import '../utils/constants.dart';
 import '../utils/textstyles.dart';
+import '../widgets/WidgetForm.dart';
 
 class TicketShape extends StatelessWidget {
   final DestinationTicket? flights;
@@ -18,21 +19,29 @@ class TicketShape extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.8,
-      height: MediaQuery.of(context).size.height * 0.2,
-      child: ClipPath(
-        clipper: MyCustomClipper(),
-        child: CustomPaint(
-          painter: MyCustomPainter(),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: flights != null ? TicketContent(flights: flights!) : const Text('No flight data'),
-            height: double.maxFinite,
-            width: double.maxFinite,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.borderColor, width: 2),
-              borderRadius: const BorderRadius.all(Radius.circular(20)),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => WidgetForm()),
+        );
+      },
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        height: MediaQuery.of(context).size.height * 0.2,
+        child: ClipPath(
+          clipper: MyCustomClipper(),
+          child: CustomPaint(
+            painter: MyCustomPainter(),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: flights != null ? TicketContent(flights: flights!) : const Text('No flight data'),
+              height: double.maxFinite,
+              width: double.maxFinite,
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.borderColor, width: 2),
+                borderRadius: const BorderRadius.all(Radius.circular(20)),
+              ),
             ),
           ),
         ),
@@ -74,7 +83,6 @@ class TicketContent extends StatelessWidget {
                   "Departure Date: ${flights.departureDate}",
                   style: appTextStyle(AppColors.TextColor2, commonSize.width * 0.033, FontWeight.w500),
                 ),
-
                 Text(
                   "Cost: ${flights.cost}",
                   style: appTextStyle(AppColors.blackColor, commonSize.width * 0.04, FontWeight.w700),
